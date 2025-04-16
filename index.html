@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solar Web</title>
+  <!-- Hoja de estilos -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Librerías necesarias -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@3.9.0/dist/chartjs-chart-box-and-violin-plot.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <!-- Menú principal -->
+  <header id="heroSection" class="hero-section">
+    <div class="hero-content">
+      <h1>Solar Web</h1>
+      <h2>¡Optimiza la energía solar en tu hogar!</h2>
+      <p>Ingresa tus datos y utiliza nuestros métodos para dimensionar tu sistema.</p>
+      <div class="hero-buttons">
+        <button onclick="showSection('consumoSection')">Datos de Consumo</button>
+        <button onclick="showSection('panelesInfoSection')">Conócelos</button>
+        <button onclick="showSection('regressionSection')">Ajuste Lineal</button>
+        <button onclick="showSection('parabolaSection')">Ajuste Cuadrático</button>
+        <button onclick="showSection('planeSection')">Ajuste 3D</button>
+        <button onclick="showSection('algebraSection')">Herr. Avanzadas</button>
+        <button onclick="showSection('helpSection')">Ayuda</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenedor principal -->
+  <div class="wrapper">
+    <!-- Sección: Datos de Consumo y Simulación de Baterías -->
+    <section class="container" id="consumoSection">
+      <h2>Datos de Consumo y Simulación de Baterías</h2>
+      <div class="info-section">
+        <p>Ingresa los datos para dimensionar tu sistema solar. La gráfica de radiación mostrará los datos de la ciudad principal y, si se selecciona, la ciudad de comparación. Luego, se simulará la producción usando un análisis Monte Carlo y se podrá simular la energía almacenada en baterías.</p>
+      </div>
+      
+      <!-- Datos de Panel, Ciudades, Fecha y Consumo -->
+      <label>Área del Panel (m²):</label>
+      <input type="number" id="panelArea" value="1.7" step="0.1" min="0.5">
+      
+      <label>Eficiencia del Panel (%):</label>
+      <input type="number" id="efficiency" value="18" min="1" max="100">
+      
+      <label>Ciudad Principal:</label>
+      <select id="consumoCitySelect"></select>
+      
+      <label>Comparar con Ciudad 2 (opcional):</label>
+      <select id="city2"></select>
+      
+      <label>Fecha de Referencia (YYYY-MM-DD):</label>
+      <input type="date" id="referenceDate" value="2023-07-01">
+      
+      <label>Consumo Diario (kWh/día):</label>
+      <input type="number" id="dailyConsumption" value="5" step="0.1" min="0.1">
+      
+      <label>Producción Ideal por Panel (kWh/día):</label>
+      <input type="number" id="idealProduction" value="1.5" step="0.1" min="0.1">
+      
+      <!-- Botón para calcular sistema -->
+      <button onclick="calculateSystem()">Calcular Sistema y Comparar</button>
+      
+      <!-- Sección de Simulación de Baterías -->
+      <div class="info-section battery-section">
+        <h3>Simular Baterías</h3>
+        <label>Capacidad de Batería (kWh):</label>
+        <input type="number" id="batteryCapacity" value="10" min="1">
+        <label>Eficiencia de Batería (%):</label>
+        <input type="number" id="batteryEfficiency" value="90" min="1" max="100">
+        <button onclick="simulateAndDisplayBattery()">Simular Baterías</button>
+      </div>
+
+      <!-- Resultado de cálculo del sistema y simulación -->
+      <div id="optResult"></div>
+      <div id="batteryResult" class="simulation-result"></div>
+
+      <!-- Gráficas: Comparativa y Histograma de Producción -->
+      <div class="chart-container">
+        <canvas id="radiationComparisonChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="optChart"></canvas>
+      </div>
+      
+      <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
+    </section>
+    
+    <!-- Sección: Paneles Disponibles y Análisis Económico -->
+    <section class="container" id="panelesInfoSection">
+      <h2>Paneles Disponibles</h2>
+      <div class="info-section">
+        <p>Selecciona el tipo de panel y consulta el costo total y el punto de equilibrio para el modelo seleccionado.</p>
+        <select id="panelType" onchange="renderPanelModels()">
+          <option value="residential" selected>Residencial</option>
+          <option value="industrial">Industrial</option>
+        </select>
+      </div>
+      <div id="panelModelsContainer">
+        <!-- Se generarán dinámicamente -->
+      </div>
+      <!-- Sección de Costos -->
+      <div class="info-section">
+        <h3>Análisis Económico</h3>
+        <div class="cost-input-group">
+          <label>Costo de instalación (MXN): <input type="number" id="installationCost" value="10000"></label>
+          <label>Tarifa eléctrica (MXN/kWh): <input type="number" id="energyRate" value="2.5"></label>
+        </div>
+        <div id="costResult"></div>
+      </div>
+      <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
+    </section>
+    
+    <!-- Otras secciones: Ajuste Lineal, Cuadrático, 3D, Herr. Avanzadas, Ayuda. (Se mantienen sin cambios significativos) -->
+    <!-- Sección: Ajuste Lineal -->
+    <section class="container" id="regressionSection">
+      <h2>Ajuste Lineal</h2>
+      <p>Utiliza regresión lineal para modelar tus datos.</p>
+      <label for="dataInputMethod">Método de ingreso:</label>
+      <select id="dataInputMethod" onchange="toggleDataInput()">
+        <option value="manual" selected>Ingresar manualmente</option>
+        <option value="file">Subir archivo Excel</option>
+      </select>
+      <div id="manualInputSection">
+        <label for="regressionInput">Datos (formato "x,y; x,y; ..."):</label>
+        <textarea id="regressionInput" placeholder="Ej: 1,2; 2,4; 3,5"></textarea>
+      </div>
+      <div id="fileInputSection" style="display: none;">
+        <label for="fileUpload">Subir archivo Excel (.xlsx):</label>
+        <input type="file" id="fileUpload" accept=".xlsx">
+      </div>
+      <button onclick="processRegression()">Procesar Ajuste Lineal</button>
+      <div id="regressionResult"></div>
+      <div class="chart-container">
+        <canvas id="regressionChart"></canvas>
+      </div>
+      <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
+    </section>
+
+    <!-- Sección: Ajuste Cuadrático -->
+    <section class="container" id="parabolaSection">
+      <h2>Ajuste Cuadrático</h2>
+      <p>Ingresa datos para realizar un ajuste cuadrático (parábola).</p>
+      <label for="parabolaInputMethod">Método de ingreso:</label>
+      <select id="parabolaInputMethod" onchange="toggleParabolaInput()">
+        <option value="manual" selected>Ingresar manualmente</option>
+        <option value="file">Subir archivo Excel</option>
+      </select>
+      <div id="parabolaManualContainer">
+        <label for="parabolaInput">Datos (formato "x,y; x,y; ..."):</label>
+        <textarea id="parabolaInput" placeholder="Ej: 1,1; 2,4; 3,9"></textarea>
+      </div>
+      <div id="parabolaFileContainer" style="display: none;">
+        <label for="parabolaFileUpload">Subir archivo Excel (.xlsx):</label>
+        <input type="file" id="parabolaFileUpload" accept=".xlsx">
+      </div>
+      <button onclick="processParabola()">Procesar Ajuste Cuadrático</button>
+      <div id="parabolaResult"></div>
+      <div class="chart-container">
+        <canvas id="parabolaChart"></canvas>
+      </div>
+      <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
+    </section>
+
+    <!-- Sección: Ajuste 3D -->
+    <section class="container" id="planeSection">
+      <h2>Ajuste 3D</h2>
+      <p>Ingresa puntos (x, y, z) para ajustar un plano (z = A·x + B·y + C).</p>
+      <select id="planeDataInputMethod" onchange="togglePlaneDataInput()">
+        <option value="manual" selected>Ingreso Manual</option>
+        <option value="file">Cargar archivo Excel</option>
+      </select>
+      <div id="planeManualContainer">
+        <p>Ingresa tus datos en la siguiente tabla:</p>
+        <table id="planeDataTable">
+          <thead>
+            <tr>
+              <th>x</th>
+              <th>y</th>
+              <th>z</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" step="any" class="plane-input-x"></td>
+              <td><input type="number" step="any" class="plane-input-y"></td>
+              <td><input type="number" step="any" class="plane-input-z"></td>
+              <td><button type="button" onclick="removePlaneRow(this)">Eliminar</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" onclick="addPlaneRow()">Agregar fila</button>
+      </div>
+      <div id="planeFileContainer" style="display: none;">
+        <label for="planeFileUpload">Subir archivo Excel (.xlsx):</label>
+        <input type="file" id="planeFileUpload" accept=".xlsx">
+      </div>
+      <button onclick="processPlane()">Procesar Ajuste 3D</button>
+      <div id="planeResult"></div>
+      <div id="planeChart" class="chart-container" style="height:400px;"></div>
+      <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
+    </section>
+
+    <!-- Sección: Herramientas Avanzadas (Matrices) -->
+    <section class="container" id="algebraSection">
+      <h2>Herramientas Avanzadas</h2>
+      <p>Realiza operaciones con matrices para apoyar el modelado de datos.</p>
+      <div class="matrix-container">
+        <div>
+          <h3>Matriz A</h3>
+          <textarea id="matrixA" placeholder="Ej: 1,2,3&#10;4,5,6"></textarea>
+          <input type="file" id="matrixAFile" accept=".csv,.xlsx" class="matrix-file-btn" onchange="loadMatrixFile('matrixA', this)">
+        </div>
+        <div>
+          <h3>Matriz B</h3>
+          <textarea id="matrixB" placeholder="Ej: 7,8,9&#10;10,11,12"></textarea>
+          <input type="file" id="matrixBFile" accept=".csv,.xlsx" class="matrix-file-btn" onchange="loadMatrixFile('matrixB', this)">
+        </div>
+      </div>
+      <button onclick="addMatrices()">Sumar Matrices (A+B)</button>
+      <button onclick="multiplyMatrices()">Multiplicar Matrices (A×B)</button>
+      <div id="algebraResult1" class="simulation-result"></div>
+      <hr class="separator2">
+      <p>Para una sola matriz, ingresa la matriz y selecciona la operación:</p>
+      <textarea id="matrixSingle" placeholder="Ej: 4,7&#10;2,6"></textarea>
+      <input type="file" id="matrixSingleFile" accept=".csv,.xlsx" class="matrix-file-btn" onchange="loadMatrixFile('matrixSingle', this)">
+      <button onclick="transposeMatrix()">Transponer Matriz</button>
+      <button onclick="invertMatrix()">Invertir Matriz</button>
+      <div id="algebraResult2" class="simulation-result"></div>
+      <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
+    </section>
+
+    <!-- Sección: Ayuda -->
+    <section class="container" id="helpSection">
+      <h2>Ayuda</h2>
+      <div class="help-item">
+        <h3>Guía de Uso</h3>
+        <p>Instrucciones para ingresar datos, interpretar gráficos y utilizar cada herramienta.</p>
+      </div>
+      <div class="help-item">
+        <h3>Histograma</h3>
+        <p>Visualiza la frecuencia de los datos en intervalos.</p>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/-VZ4x_rLCHE" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="help-item">
+        <h3>Boxplot</h3>
+        <p>Muestra la mediana, cuartiles y valores atípicos.</p>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/24Uz1mBksL4" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="help-item">
+        <h3>Gráfico XY</h3>
+        <p>Visualiza la relación entre dos variables.</p>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/edE5Y1kOgFw" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="help-item">
+        <h3>Media</h3>
+        <p>Explicación del cálculo del promedio.</p>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/0DA7Wtz1ddg" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="help-item">
+        <h3>Mediana</h3>
+        <p>Concepto y cálculo del valor central.</p>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/ms_prB5cLI8" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="help-item">
+        <h3>Desviación Estándar</h3>
+        <p>Mide la dispersión de los datos respecto a la media.</p>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/YC9158GWkpY" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="help-item">
+        <h3>Varianza y Sesgo</h3>
+        <p>Explicación de la varianza y el sesgo en la distribución de datos.</p>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/oZRaDwnpXkY" allowfullscreen></iframe>
+        </div>
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/9fAjRjbNdK4" allowfullscreen></iframe>
+        </div>
+      </div>
+      <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
+    </section>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
