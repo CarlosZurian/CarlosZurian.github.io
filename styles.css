@@ -262,6 +262,22 @@ button:hover {
   font-size: 13px;
 }
 
+/* Estilos para la sección del blog */
+#blogSection h2 {
+  color: #6be31c;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#blogSection .info-section {
+  margin-bottom: 20px;
+}
+
+#blogSection ul {
+  list-style-type: disc;
+  margin-left: 20px;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .hero-content h1 {
