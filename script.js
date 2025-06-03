@@ -626,6 +626,57 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   /***************************************************
+   * Minijuego de Probabilidad: Pelotas en una Urna
+   ***************************************************/
+  window.calcularProbabilidadUrna = function() {
+    const n = parseInt(document.getElementById("probN").value);
+    const evento = document.getElementById("probEvent").value;
+    const resultDiv = document.getElementById("probGameResult");
+    if (isNaN(n) || n < 2) {
+      resultDiv.innerHTML = "El número de pelotas debe ser al menos 2.";
+      return;
+    }
+    // Contar pares e impares
+    const P = Math.floor(n / 2); // pares
+    const I = n - P;             // impares
+    const total = n * (n - 1) / 2;
+
+    let prob = 0, explicacion = "";
+
+    if (evento === "sumPar") {
+      // Ambos pares o ambos impares
+      const ambosPares = P * (P - 1) / 2;
+      const ambosImpares = I * (I - 1) / 2;
+      prob = (ambosPares + ambosImpares) / total;
+      explicacion = `Probabilidad de que la suma sea par:<br>
+      Pares: ${P}, Impares: ${I}<br>
+      Combinaciones ambos pares: ${ambosPares}<br>
+      Combinaciones ambos impares: ${ambosImpares}<br>
+      Total combinaciones: ${total}<br>
+      <b>Probabilidad = ${prob.toFixed(4)} (${((prob)*100).toFixed(2)}%)</b>`;
+    } else if (evento === "sumImpar") {
+      // Un par y un impar
+      const parImpar = P * I;
+      prob = parImpar / total;
+      explicacion = `Probabilidad de que la suma sea impar:<br>
+      Pares: ${P}, Impares: ${I}<br>
+      Combinaciones par-impar: ${parImpar}<br>
+      Total combinaciones: ${total}<br>
+      <b>Probabilidad = ${prob.toFixed(4)} (${((prob)*100).toFixed(2)}%)</b>`;
+    } else if (evento === "alMenosUnaPar") {
+      // Complemento: 1 - probabilidad de ambas impares
+      const ambosImpares = I * (I - 1) / 2;
+      prob = 1 - (ambosImpares / total);
+      explicacion = `Probabilidad de que al menos una sea par:<br>
+      Pares: ${P}, Impares: ${I}<br>
+      Combinaciones ambos impares: ${ambosImpares}<br>
+      Total combinaciones: ${total}<br>
+      <b>Probabilidad = ${prob.toFixed(4)} (${((prob)*100).toFixed(2)}%)</b>`;
+    }
+    resultDiv.innerHTML = explicacion;
+  };
+
+  /***************************************************
    * Funciones para Archivos CSV
    ***************************************************/
   function parseCSV(data) {
@@ -1157,6 +1208,57 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   /***************************************************
+   * Minijuego de Probabilidad: Pelotas en una Urna
+   ***************************************************/
+  window.calcularProbabilidadUrna = function() {
+    const n = parseInt(document.getElementById("probN").value);
+    const evento = document.getElementById("probEvent").value;
+    const resultDiv = document.getElementById("probGameResult");
+    if (isNaN(n) || n < 2) {
+      resultDiv.innerHTML = "El número de pelotas debe ser al menos 2.";
+      return;
+    }
+    // Contar pares e impares
+    const P = Math.floor(n / 2); // pares
+    const I = n - P;             // impares
+    const total = n * (n - 1) / 2;
+
+    let prob = 0, explicacion = "";
+
+    if (evento === "sumPar") {
+      // Ambos pares o ambos impares
+      const ambosPares = P * (P - 1) / 2;
+      const ambosImpares = I * (I - 1) / 2;
+      prob = (ambosPares + ambosImpares) / total;
+      explicacion = `Probabilidad de que la suma sea par:<br>
+      Pares: ${P}, Impares: ${I}<br>
+      Combinaciones ambos pares: ${ambosPares}<br>
+      Combinaciones ambos impares: ${ambosImpares}<br>
+      Total combinaciones: ${total}<br>
+      <b>Probabilidad = ${prob.toFixed(4)} (${((prob)*100).toFixed(2)}%)</b>`;
+    } else if (evento === "sumImpar") {
+      // Un par y un impar
+      const parImpar = P * I;
+      prob = parImpar / total;
+      explicacion = `Probabilidad de que la suma sea impar:<br>
+      Pares: ${P}, Impares: ${I}<br>
+      Combinaciones par-impar: ${parImpar}<br>
+      Total combinaciones: ${total}<br>
+      <b>Probabilidad = ${prob.toFixed(4)} (${((prob)*100).toFixed(2)}%)</b>`;
+    } else if (evento === "alMenosUnaPar") {
+      // Complemento: 1 - probabilidad de ambas impares
+      const ambosImpares = I * (I - 1) / 2;
+      prob = 1 - (ambosImpares / total);
+      explicacion = `Probabilidad de que al menos una sea par:<br>
+      Pares: ${P}, Impares: ${I}<br>
+      Combinaciones ambos impares: ${ambosImpares}<br>
+      Total combinaciones: ${total}<br>
+      <b>Probabilidad = ${prob.toFixed(4)} (${((prob)*100).toFixed(2)}%)</b>`;
+    }
+    resultDiv.innerHTML = explicacion;
+  };
+
+  /***************************************************
    * Funciones para Archivos CSV
    ***************************************************/
   function parseCSV(data) {
@@ -1307,44 +1409,743 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   };
 
-  function renderParabolaChart(dataPoints, coeffs) {
-    const ctx = document.getElementById("parabolaChart").getContext("2d");
-    if (window.parabolaChartInstance) window.parabolaChartInstance.destroy();
-    const xs = dataPoints.map(pt => pt.x);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const step = (maxX - minX) / 100;
-    let parabolaPoints = [];
-    for (let x = minX - 2; x <= maxX + 2; x += step) {
-      parabolaPoints.push({ x: x, y: coeffs[0] * x ** 2 + coeffs[1] * x + coeffs[2] });
+  /***************************************************
+   * AJUSTE 3D
+   ***************************************************/
+  window.togglePlaneDataInput = function() {
+    const method = document.getElementById("planeDataInputMethod").value;
+    if (method === "manual") {
+      document.getElementById("planeManualContainer").style.display = "block";
+      document.getElementById("planeFileContainer").style.display = "none";
+    } else {
+      document.getElementById("planeManualContainer").style.display = "none";
+      document.getElementById("planeFileContainer").style.display = "block";
     }
-    window.parabolaChartInstance = new Chart(ctx, {
+  };
+
+  window.addPlaneRow = function() {
+    const table = document.getElementById("planeDataTable").getElementsByTagName("tbody")[0];
+    const newRow = table.rows[0].cloneNode(true);
+    newRow.querySelectorAll("input").forEach(input => input.value = "");
+    table.appendChild(newRow);
+  };
+
+  window.removePlaneRow = function(btn) {
+    const row = btn.parentNode.parentNode;
+    const table = row.parentNode;
+    if (table.rows.length > 1) { table.removeChild(row); }
+  };
+
+  window.processPlane = function() {
+    const rows = document.querySelectorAll("#planeDataTable tbody tr");
+    let points = [];
+    rows.forEach(row => {
+      const x = parseFloat(row.querySelector(".plane-input-x").value);
+      const y = parseFloat(row.querySelector(".plane-input-y").value);
+      const z = parseFloat(row.querySelector(".plane-input-z").value);
+      if (!isNaN(x) && !isNaN(y) && !isNaN(z)) { points.push({ x, y, z }); }
+    });
+    if (points.length < 3) { alert("Ingresa al menos 3 puntos para ajustar un plano."); return; }
+    let X = points.map(pt => [pt.x, pt.y, 1]);
+    let Z = points.map(pt => pt.z);
+    try {
+      const XT = math.transpose(X);
+      const XTX = math.multiply(XT, X);
+      const invXTX = math.inv(XTX);
+      const XTZ = math.multiply(XT, Z);
+      const coeffs = math.multiply(invXTX, XTZ);
+      const A_coeff = coeffs[0],
+            B_coeff = coeffs[1],
+            C_coeff = coeffs[2];
+      document.getElementById("planeResult").innerHTML = `<p>Plano ajustado: z = ${A_coeff.toFixed(2)}x + ${B_coeff.toFixed(2)}y + ${C_coeff.toFixed(2)}</p>`;
+      const xs = points.map(p => p.x);
+      const ys = points.map(p => p.y);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const gridSize = 20;
+      let xGrid = linspace(minX, maxX, gridSize);
+      let yGrid = linspace(minY, maxY, gridSize);
+      let zGrid = [];
+      for (let i = 0; i < gridSize; i++) {
+        let row = [];
+        for (let j = 0; j < gridSize; j++) {
+          row.push(A_coeff * xGrid[j] + B_coeff * yGrid[i] + C_coeff);
+        }
+        zGrid.push(row);
+      }
+      const data = [
+        {
+          x: points.map(p => p.x),
+          y: points.map(p => p.y),
+          z: points.map(p => p.z),
+          mode: 'markers',
+          type: 'scatter3d',
+          marker: { size: 4, color: 'red' },
+          name: 'Datos'
+        },
+        {
+          x: xGrid,
+          y: yGrid,
+          z: zGrid,
+          type: 'surface',
+          opacity: 0.7,
+          colorscale: 'Viridis',
+          name: 'Plano Ajustado'
+        }
+      ];
+      const layout = {
+        title: 'Ajuste 3D (Plano)',
+        autosize: true,
+        scene: { xaxis: { title: 'X' }, yaxis: { title: 'Y' }, zaxis: { title: 'Z' } }
+      };
+      Plotly.newPlot('planeChart', data, layout);
+    } catch (error) {
+      alert("Error en el ajuste 3D: " + error);
+    }
+  };
+
+  /***************************************************
+   * Funciones para Archivos CSV
+   ***************************************************/
+  function parseCSV(data) {
+    const rows = data.split('\n');
+    return rows.map(row => {
+      const [date, radiation] = row.split(',');
+      return { date, radiation: parseFloat(radiation) };
+    });
+  }
+
+  async function handleCSVUpload(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const csvData = parseCSV(e.target.result);
+      window.solarData = {
+        dates: csvData.map(d => d.date),
+        values: csvData.map(d => d.radiation)
+      };
+      renderRadiationCharts(window.solarData.values, window.solarData.dates);
+    };
+    reader.readAsText(file);
+  }
+
+  /***************************************************
+   * REGRESIÓN LINEAL (Funciones existentes)
+   ***************************************************/
+  window.processRegression = function() {
+    const method = document.getElementById("dataInputMethod").value;
+    if (method === "manual") processManualRegression();
+    else processFileRegression();
+  };
+
+  function processManualRegression() {
+    const input = document.getElementById("regressionInput").value.trim();
+    if (!input) { alert("Ingresa datos en formato: x,y; x,y; ..."); return; }
+    let dataPoints = parseData(input);
+    if (!dataPoints) return;
+    calculateAndRenderRegression(dataPoints);
+  }
+
+  function processFileRegression() {
+    const fileInput = document.getElementById("fileUpload");
+    if (!fileInput.files.length) { alert("Selecciona un archivo Excel."); return; }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      if (!jsonData.length || jsonData[0].length < 2) { alert("El archivo debe tener 2 columnas (X e Y)."); return; }
+      let dataPoints = jsonData.map(row => ({ x: parseFloat(row[0]), y: parseFloat(row[1]) }))
+                                .filter(pt => !isNaN(pt.x) && !isNaN(pt.y));
+      if (dataPoints.length === 0) { alert("No se encontraron datos válidos."); return; }
+      calculateAndRenderRegression(dataPoints);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function parseData(input) {
+    const pairs = input.split(";").map(p => p.trim()).filter(p => p !== "");
+    let dataPoints = [];
+    for (let pair of pairs) {
+      const nums = pair.split(",").map(n => Number(n.trim()));
+      if (nums.length !== 2 || isNaN(nums[0]) || isNaN(nums[1])) {
+        alert("Datos no válidos. Usa: x,y; x,y; ...");
+        return null;
+      }
+      dataPoints.push({ x: nums[0], y: nums[1] });
+    }
+    return dataPoints;
+  }
+
+  function calculateAndRenderRegression(dataPoints) {
+    const resultElem = document.getElementById("regressionResult");
+    const ctx = document.getElementById("regressionChart").getContext("2d");
+    const n = dataPoints.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    dataPoints.forEach(pt => {
+      sumX += pt.x;
+      sumY += pt.y;
+      sumXY += pt.x * pt.y;
+      sumXX += pt.x * pt.x;
+    });
+    const m = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const b = (sumY - m * sumX) / n;
+    resultElem.innerHTML = `<p>Recta: y = ${m.toFixed(2)}x + ${b.toFixed(2)}</p>`;
+    const minX = Math.min(...dataPoints.map(pt => pt.x));
+    const maxX = Math.max(...dataPoints.map(pt => pt.x));
+    const regressionLine = [{ x: minX, y: m * minX + b }, { x: maxX, y: m * maxX + b }];
+    if (window.dataChartInstance) window.dataChartInstance.destroy();
+    window.dataChartInstance = new Chart(ctx, {
       type: "scatter",
       data: {
         datasets: [
           { label: "Datos", data: dataPoints, backgroundColor: "#e74c3c", borderColor: "#c0392b", pointRadius: 5 },
-          { label: "Parábola ajustada", data: parabolaPoints, type: "line", borderColor: "#2ecc71", borderWidth: 2, pointRadius: 0 }
+          { label: "Línea", data: regressionLine, type: "line", fill: false, borderColor: "#2ecc71", borderWidth: 2, pointRadius: 0 }
         ]
       },
-      options: { scales: { x: { title: { display: true, text: "X" } }, y: { title: { display: true, text: "Y" } } } }
+      options: { responsive: true, scales: { x: { title: { display: true, text: "Eje X" } }, y: { title: { display: true, text: "Eje Y" } } } }
     });
   }
 
-  async function parseExcelData(file) {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        const points = jsonData.filter(row => row.length >= 2)
-          .map(row => ({ x: row[0], y: row[1] }));
-        resolve(points);
+  /***************************************************
+   * AJUSTE CUADRÁTICO
+   ***************************************************/
+  window.toggleParabolaInput = function() {
+    const method = document.getElementById("parabolaInputMethod").value;
+    document.getElementById("parabolaManualContainer").style.display = (method === "manual") ? "block" : "none";
+    document.getElementById("parabolaFileContainer").style.display = (method === "file") ? "block" : "none";
+  };
+
+  window.processParabola = async function() {
+    const method = document.getElementById("parabolaInputMethod").value;
+    let dataPoints = [];
+    if (method === "manual") {
+      const input = document.getElementById("parabolaInput").value.trim();
+      dataPoints = parseData(input);
+    } else {
+      const file = document.getElementById("parabolaFileUpload").files[0];
+      if (!file) { alert("Sube un archivo Excel."); return; }
+      dataPoints = await parseExcelData(file);
+    }
+    if (!dataPoints || dataPoints.length < 3) { alert("Se requieren al menos 3 puntos."); return; }
+    const n = dataPoints.length;
+    let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0, sumY = 0, sumXY = 0, sumX2Y = 0;
+    dataPoints.forEach(pt => {
+      sumX += pt.x;
+      sumX2 += pt.x ** 2;
+      sumX3 += pt.x ** 3;
+      sumX4 += pt.x ** 4;
+      sumY += pt.y;
+      sumXY += pt.x * pt.y;
+      sumX2Y += (pt.x ** 2) * pt.y;
+    });
+    const matrix = [
+      [n, sumX, sumX2],
+      [sumX, sumX2, sumX3],
+      [sumX2, sumX3, sumX4]
+    ];
+    const vector = [sumY, sumXY, sumX2Y];
+    try {
+      const coefficients = math.lusolve(matrix, vector).flat();
+      renderParabolaChart(dataPoints, coefficients);
+      document.getElementById("parabolaResult").innerHTML = `<p>Ecuación: y = ${coefficients[0].toFixed(2)}x² + ${coefficients[1].toFixed(2)}x + ${coefficients[2].toFixed(2)}</p>`;
+    } catch (error) {
+      alert("Error en el ajuste cuadrático: " + error);
+    }
+  };
+
+  /***************************************************
+   * AJUSTE 3D
+   ***************************************************/
+  window.togglePlaneDataInput = function() {
+    const method = document.getElementById("planeDataInputMethod").value;
+    if (method === "manual") {
+      document.getElementById("planeManualContainer").style.display = "block";
+      document.getElementById("planeFileContainer").style.display = "none";
+    } else {
+      document.getElementById("planeManualContainer").style.display = "none";
+      document.getElementById("planeFileContainer").style.display = "block";
+    }
+  };
+
+  window.addPlaneRow = function() {
+    const table = document.getElementById("planeDataTable").getElementsByTagName("tbody")[0];
+    const newRow = table.rows[0].cloneNode(true);
+    newRow.querySelectorAll("input").forEach(input => input.value = "");
+    table.appendChild(newRow);
+  };
+
+  window.removePlaneRow = function(btn) {
+    const row = btn.parentNode.parentNode;
+    const table = row.parentNode;
+    if (table.rows.length > 1) { table.removeChild(row); }
+  };
+
+  window.processPlane = function() {
+    const rows = document.querySelectorAll("#planeDataTable tbody tr");
+    let points = [];
+    rows.forEach(row => {
+      const x = parseFloat(row.querySelector(".plane-input-x").value);
+      const y = parseFloat(row.querySelector(".plane-input-y").value);
+      const z = parseFloat(row.querySelector(".plane-input-z").value);
+      if (!isNaN(x) && !isNaN(y) && !isNaN(z)) { points.push({ x, y, z }); }
+    });
+    if (points.length < 3) { alert("Ingresa al menos 3 puntos para ajustar un plano."); return; }
+    let X = points.map(pt => [pt.x, pt.y, 1]);
+    let Z = points.map(pt => pt.z);
+    try {
+      const XT = math.transpose(X);
+      const XTX = math.multiply(XT, X);
+      const invXTX = math.inv(XTX);
+      const XTZ = math.multiply(XT, Z);
+      const coeffs = math.multiply(invXTX, XTZ);
+      const A_coeff = coeffs[0],
+            B_coeff = coeffs[1],
+            C_coeff = coeffs[2];
+      document.getElementById("planeResult").innerHTML = `<p>Plano ajustado: z = ${A_coeff.toFixed(2)}x + ${B_coeff.toFixed(2)}y + ${C_coeff.toFixed(2)}</p>`;
+      const xs = points.map(p => p.x);
+      const ys = points.map(p => p.y);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const gridSize = 20;
+      let xGrid = linspace(minX, maxX, gridSize);
+      let yGrid = linspace(minY, maxY, gridSize);
+      let zGrid = [];
+      for (let i = 0; i < gridSize; i++) {
+        let row = [];
+        for (let j = 0; j < gridSize; j++) {
+          row.push(A_coeff * xGrid[j] + B_coeff * yGrid[i] + C_coeff);
+        }
+        zGrid.push(row);
+      }
+      const data = [
+        {
+          x: points.map(p => p.x),
+          y: points.map(p => p.y),
+          z: points.map(p => p.z),
+          mode: 'markers',
+          type: 'scatter3d',
+          marker: { size: 4, color: 'red' },
+          name: 'Datos'
+        },
+        {
+          x: xGrid,
+          y: yGrid,
+          z: zGrid,
+          type: 'surface',
+          opacity: 0.7,
+          colorscale: 'Viridis',
+          name: 'Plano Ajustado'
+        }
+      ];
+      const layout = {
+        title: 'Ajuste 3D (Plano)',
+        autosize: true,
+        scene: { xaxis: { title: 'X' }, yaxis: { title: 'Y' }, zaxis: { title: 'Z' } }
       };
-      reader.readAsArrayBuffer(file);
+      Plotly.newPlot('planeChart', data, layout);
+    } catch (error) {
+      alert("Error en el ajuste 3D: " + error);
+    }
+  };
+
+  /***************************************************
+   * Funciones para Archivos CSV
+   ***************************************************/
+  function parseCSV(data) {
+    const rows = data.split('\n');
+    return rows.map(row => {
+      const [date, radiation] = row.split(',');
+      return { date, radiation: parseFloat(radiation) };
     });
   }
+
+  async function handleCSVUpload(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const csvData = parseCSV(e.target.result);
+      window.solarData = {
+        dates: csvData.map(d => d.date),
+        values: csvData.map(d => d.radiation)
+      };
+      renderRadiationCharts(window.solarData.values, window.solarData.dates);
+    };
+    reader.readAsText(file);
+  }
+
+  /***************************************************
+   * REGRESIÓN LINEAL (Funciones existentes)
+   ***************************************************/
+  window.processRegression = function() {
+    const method = document.getElementById("dataInputMethod").value;
+    if (method === "manual") processManualRegression();
+    else processFileRegression();
+  };
+
+  function processManualRegression() {
+    const input = document.getElementById("regressionInput").value.trim();
+    if (!input) { alert("Ingresa datos en formato: x,y; x,y; ..."); return; }
+    let dataPoints = parseData(input);
+    if (!dataPoints) return;
+    calculateAndRenderRegression(dataPoints);
+  }
+
+  function processFileRegression() {
+    const fileInput = document.getElementById("fileUpload");
+    if (!fileInput.files.length) { alert("Selecciona un archivo Excel."); return; }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      if (!jsonData.length || jsonData[0].length < 2) { alert("El archivo debe tener 2 columnas (X e Y)."); return; }
+      let dataPoints = jsonData.map(row => ({ x: parseFloat(row[0]), y: parseFloat(row[1]) }))
+                                .filter(pt => !isNaN(pt.x) && !isNaN(pt.y));
+      if (dataPoints.length === 0) { alert("No se encontraron datos válidos."); return; }
+      calculateAndRenderRegression(dataPoints);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function parseData(input) {
+    const pairs = input.split(";").map(p => p.trim()).filter(p => p !== "");
+    let dataPoints = [];
+    for (let pair of pairs) {
+      const nums = pair.split(",").map(n => Number(n.trim()));
+      if (nums.length !== 2 || isNaN(nums[0]) || isNaN(nums[1])) {
+        alert("Datos no válidos. Usa: x,y; x,y; ...");
+        return null;
+      }
+      dataPoints.push({ x: nums[0], y: nums[1] });
+    }
+    return dataPoints;
+  }
+
+  function calculateAndRenderRegression(dataPoints) {
+    const resultElem = document.getElementById("regressionResult");
+    const ctx = document.getElementById("regressionChart").getContext("2d");
+    const n = dataPoints.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    dataPoints.forEach(pt => {
+      sumX += pt.x;
+      sumY += pt.y;
+      sumXY += pt.x * pt.y;
+      sumXX += pt.x * pt.x;
+    });
+    const m = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const b = (sumY - m * sumX) / n;
+    resultElem.innerHTML = `<p>Recta: y = ${m.toFixed(2)}x + ${b.toFixed(2)}</p>`;
+    const minX = Math.min(...dataPoints.map(pt => pt.x));
+    const maxX = Math.max(...dataPoints.map(pt => pt.x));
+    const regressionLine = [{ x: minX, y: m * minX + b }, { x: maxX, y: m * maxX + b }];
+    if (window.dataChartInstance) window.dataChartInstance.destroy();
+    window.dataChartInstance = new Chart(ctx, {
+      type: "scatter",
+      data: {
+        datasets: [
+          { label: "Datos", data: dataPoints, backgroundColor: "#e74c3c", borderColor: "#c0392b", pointRadius: 5 },
+          { label: "Línea", data: regressionLine, type: "line", fill: false, borderColor: "#2ecc71", borderWidth: 2, pointRadius: 0 }
+        ]
+      },
+      options: { responsive: true, scales: { x: { title: { display: true, text: "Eje X" } }, y: { title: { display: true, text: "Eje Y" } } } }
+    });
+  }
+
+  /***************************************************
+   * AJUSTE CUADRÁTICO
+   ***************************************************/
+  window.toggleParabolaInput = function() {
+    const method = document.getElementById("parabolaInputMethod").value;
+    document.getElementById("parabolaManualContainer").style.display = (method === "manual") ? "block" : "none";
+    document.getElementById("parabolaFileContainer").style.display = (method === "file") ? "block" : "none";
+  };
+
+  window.processParabola = async function() {
+    const method = document.getElementById("parabolaInputMethod").value;
+    let dataPoints = [];
+    if (method === "manual") {
+      const input = document.getElementById("parabolaInput").value.trim();
+      dataPoints = parseData(input);
+    } else {
+      const file = document.getElementById("parabolaFileUpload").files[0];
+      if (!file) { alert("Sube un archivo Excel."); return; }
+      dataPoints = await parseExcelData(file);
+    }
+    if (!dataPoints || dataPoints.length < 3) { alert("Se requieren al menos 3 puntos."); return; }
+    const n = dataPoints.length;
+    let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0, sumY = 0, sumXY = 0, sumX2Y = 0;
+    dataPoints.forEach(pt => {
+      sumX += pt.x;
+      sumX2 += pt.x ** 2;
+      sumX3 += pt.x ** 3;
+      sumX4 += pt.x ** 4;
+      sumY += pt.y;
+      sumXY += pt.x * pt.y;
+      sumX2Y += (pt.x ** 2) * pt.y;
+    });
+    const matrix = [
+      [n, sumX, sumX2],
+      [sumX, sumX2, sumX3],
+      [sumX2, sumX3, sumX4]
+    ];
+    const vector = [sumY, sumXY, sumX2Y];
+    try {
+      const coefficients = math.lusolve(matrix, vector).flat();
+      renderParabolaChart(dataPoints, coefficients);
+      document.getElementById("parabolaResult").innerHTML = `<p>Ecuación: y = ${coefficients[0].toFixed(2)}x² + ${coefficients[1].toFixed(2)}x + ${coefficients[2].toFixed(2)}</p>`;
+    } catch (error) {
+      alert("Error en el ajuste cuadrático: " + error);
+    }
+  };
+
+  /***************************************************
+   * AJUSTE 3D
+   ***************************************************/
+  window.togglePlaneDataInput = function() {
+    const method = document.getElementById("planeDataInputMethod").value;
+    if (method === "manual") {
+      document.getElementById("planeManualContainer").style.display = "block";
+      document.getElementById("planeFileContainer").style.display = "none";
+    } else {
+      document.getElementById("planeManualContainer").style.display = "none";
+      document.getElementById("planeFileContainer").style.display = "block";
+    }
+  };
+
+  window.addPlaneRow = function() {
+    const table = document.getElementById("planeDataTable").getElementsByTagName("tbody")[0];
+    const newRow = table.rows[0].cloneNode(true);
+    newRow.querySelectorAll("input").forEach(input => input.value = "");
+    table.appendChild(newRow);
+  };
+
+  window.removePlaneRow = function(btn) {
+    const row = btn.parentNode.parentNode;
+    const table = row.parentNode;
+    if (table.rows.length > 1) { table.removeChild(row); }
+  };
+
+  window.processPlane = function() {
+    const rows = document.querySelectorAll("#planeDataTable tbody tr");
+    let points = [];
+    rows.forEach(row => {
+      const x = parseFloat(row.querySelector(".plane-input-x").value);
+      const y = parseFloat(row.querySelector(".plane-input-y").value);
+      const z = parseFloat(row.querySelector(".plane-input-z").value);
+      if (!isNaN(x) && !isNaN(y) && !isNaN(z)) { points.push({ x, y, z }); }
+    });
+    if (points.length < 3) { alert("Ingresa al menos 3 puntos para ajustar un plano."); return; }
+    let X = points.map(pt => [pt.x, pt.y, 1]);
+    let Z = points.map(pt => pt.z);
+    try {
+      const XT = math.transpose(X);
+      const XTX = math.multiply(XT, X);
+      const invXTX = math.inv(XTX);
+      const XTZ = math.multiply(XT, Z);
+      const coeffs = math.multiply(invXTX, XTZ);
+      const A_coeff = coeffs[0],
+            B_coeff = coeffs[1],
+            C_coeff = coeffs[2];
+      document.getElementById("planeResult").innerHTML = `<p>Plano ajustado: z = ${A_coeff.toFixed(2)}x + ${B_coeff.toFixed(2)}y + ${C_coeff.toFixed(2)}</p>`;
+      const xs = points.map(p => p.x);
+      const ys = points.map(p => p.y);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const gridSize = 20;
+      let xGrid = linspace(minX, maxX, gridSize);
+      let yGrid = linspace(minY, maxY, gridSize);
+      let zGrid = [];
+      for (let i = 0; i < gridSize; i++) {
+        let row = [];
+        for (let j = 0; j < gridSize; j++) {
+          row.push(A_coeff * xGrid[j] + B_coeff * yGrid[i] + C_coeff);
+        }
+        zGrid.push(row);
+      }
+      const data = [
+        {
+          x: points.map(p => p.x),
+          y: points.map(p => p.y),
+          z: points.map(p => p.z),
+          mode: 'markers',
+          type: 'scatter3d',
+          marker: { size: 4, color: 'red' },
+          name: 'Datos'
+        },
+        {
+          x: xGrid,
+          y: yGrid,
+          z: zGrid,
+          type: 'surface',
+          opacity: 0.7,
+          colorscale: 'Viridis',
+          name: 'Plano Ajustado'
+        }
+      ];
+      const layout = {
+        title: 'Ajuste 3D (Plano)',
+        autosize: true,
+        scene: { xaxis: { title: 'X' }, yaxis: { title: 'Y' }, zaxis: { title: 'Z' } }
+      };
+      Plotly.newPlot('planeChart', data, layout);
+    } catch (error) {
+      alert("Error en el ajuste 3D: " + error);
+    }
+  };
+
+  /***************************************************
+   * Funciones para Archivos CSV
+   ***************************************************/
+  function parseCSV(data) {
+    const rows = data.split('\n');
+    return rows.map(row => {
+      const [date, radiation] = row.split(',');
+      return { date, radiation: parseFloat(radiation) };
+    });
+  }
+
+  async function handleCSVUpload(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const csvData = parseCSV(e.target.result);
+      window.solarData = {
+        dates: csvData.map(d => d.date),
+        values: csvData.map(d => d.radiation)
+      };
+      renderRadiationCharts(window.solarData.values, window.solarData.dates);
+    };
+    reader.readAsText(file);
+  }
+
+  /***************************************************
+   * REGRESIÓN LINEAL (Funciones existentes)
+   ***************************************************/
+  window.processRegression = function() {
+    const method = document.getElementById("dataInputMethod").value;
+    if (method === "manual") processManualRegression();
+    else processFileRegression();
+  };
+
+  function processManualRegression() {
+    const input = document.getElementById("regressionInput").value.trim();
+    if (!input) { alert("Ingresa datos en formato: x,y; x,y; ..."); return; }
+    let dataPoints = parseData(input);
+    if (!dataPoints) return;
+    calculateAndRenderRegression(dataPoints);
+  }
+
+  function processFileRegression() {
+    const fileInput = document.getElementById("fileUpload");
+    if (!fileInput.files.length) { alert("Selecciona un archivo Excel."); return; }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      if (!jsonData.length || jsonData[0].length < 2) { alert("El archivo debe tener 2 columnas (X e Y)."); return; }
+      let dataPoints = jsonData.map(row => ({ x: parseFloat(row[0]), y: parseFloat(row[1]) }))
+                                .filter(pt => !isNaN(pt.x) && !isNaN(pt.y));
+      if (dataPoints.length === 0) { alert("No se encontraron datos válidos."); return; }
+      calculateAndRenderRegression(dataPoints);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function parseData(input) {
+    const pairs = input.split(";").map(p => p.trim()).filter(p => p !== "");
+    let dataPoints = [];
+    for (let pair of pairs) {
+      const nums = pair.split(",").map(n => Number(n.trim()));
+      if (nums.length !== 2 || isNaN(nums[0]) || isNaN(nums[1])) {
+        alert("Datos no válidos. Usa: x,y; x,y; ...");
+        return null;
+      }
+      dataPoints.push({ x: nums[0], y: nums[1] });
+    }
+    return dataPoints;
+  }
+
+  function calculateAndRenderRegression(dataPoints) {
+    const resultElem = document.getElementById("regressionResult");
+    const ctx = document.getElementById("regressionChart").getContext("2d");
+    const n = dataPoints.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    dataPoints.forEach(pt => {
+      sumX += pt.x;
+      sumY += pt.y;
+      sumXY += pt.x * pt.y;
+      sumXX += pt.x * pt.x;
+    });
+    const m = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const b = (sumY - m * sumX) / n;
+    resultElem.innerHTML = `<p>Recta: y = ${m.toFixed(2)}x + ${b.toFixed(2)}</p>`;
+    const minX = Math.min(...dataPoints.map(pt => pt.x));
+    const maxX = Math.max(...dataPoints.map(pt => pt.x));
+    const regressionLine = [{ x: minX, y: m * minX + b }, { x: maxX, y: m * maxX + b }];
+    if (window.dataChartInstance) window.dataChartInstance.destroy();
+    window.dataChartInstance = new Chart(ctx, {
+      type: "scatter",
+      data: {
+        datasets: [
+          { label: "Datos", data: dataPoints, backgroundColor: "#e74c3c", borderColor: "#c0392b", pointRadius: 5 },
+          { label: "Línea", data: regressionLine, type: "line", fill: false, borderColor: "#2ecc71", borderWidth: 2, pointRadius: 0 }
+        ]
+      },
+      options: { responsive: true, scales: { x: { title: { display: true, text: "Eje X" } }, y: { title: { display: true, text: "Eje Y" } } } }
+    });
+  }
+
+  /***************************************************
+   * AJUSTE CUADRÁTICO
+   ***************************************************/
+  window.toggleParabolaInput = function() {
+    const method = document.getElementById("parabolaInputMethod").value;
+    document.getElementById("parabolaManualContainer").style.display = (method === "manual") ? "block" : "none";
+    document.getElementById("parabolaFileContainer").style.display = (method === "file") ? "block" : "none";
+  };
+
+  window.processParabola = async function() {
+    const method = document.getElementById("parabolaInputMethod").value;
+    let dataPoints = [];
+    if (method === "manual") {
+      const input = document.getElementById("parabolaInput").value.trim();
+      dataPoints = parseData(input);
+    } else {
+      const file = document.getElementById("parabolaFileUpload").files[0];
+      if (!file) { alert("Sube un archivo Excel."); return; }
+      dataPoints = await parseExcelData(file);
+    }
+    if (!dataPoints || dataPoints.length < 3) { alert("Se requieren al menos 3 puntos."); return; }
+    const n = dataPoints.length;
+    let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0, sumY = 0, sumXY = 0, sumX2Y = 0;
+    dataPoints.forEach(pt => {
+      sumX += pt.x;
+      sumX2 += pt.x ** 2;
+      sumX3 += pt.x ** 3;
+      sumX4 += pt.x ** 4;
+      sumY += pt.y;
+      sumXY += pt.x * pt.y;
+      sumX2Y += (pt.x ** 2) * pt.y;
+    });
+    const matrix = [
+      [n, sumX, sumX2],
+      [sumX, sumX2, sumX3],
+      [sumX2, sumX3, sumX4]
+    ];
+    const vector = [sumY, sumXY, sumX2Y];
+    try {
+      const coefficients = math.lusolve(matrix, vector).flat();
+      renderParabolaChart(dataPoints, coefficients);
+      document.getElementById("parabolaResult").innerHTML = `<p>Ecuación: y = ${coefficients[0].toFixed(2)}x² + ${coefficients[1].toFixed(2)}x + ${coefficients[2].toFixed(2)}</p>`;
+    } catch (error) {
+      alert("Error en el ajuste cuadrático: " + error);
+    }
+  };
 
   /***************************************************
    * AJUSTE 3D
