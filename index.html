@@ -30,6 +30,7 @@
         <button onclick="showSection('algebraSection')">Herr. Avanzadas</button>
         <button onclick="showSection('helpSection')">Ayuda</button>
         <button onclick="showSection('blogSection')">Blog</button>
+        <button onclick="showSection('probGameSection')">Juego de probabilidad</button>
       </div>
     </div>
   </header>
@@ -339,6 +340,29 @@
           <li>Pruebas y optimización para garantizar una experiencia fluida.</li>
         </ol>
       </div>
+      <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
+    </section>
+
+    <!-- Minijuego de Probabilidad -->
+    <section class="container" id="probGameSection" style="display:none;">
+      <h2>Juego de Probabilidad: Pelotas en una Urna</h2>
+      <div class="info-section">
+        <p>
+          Ingresa el número total de pelotas (n) y selecciona el evento de interés. Se extraen 2 pelotas sin reemplazo.
+        </p>
+      </div>
+      <label for="probN">Número total de pelotas (n):</label>
+      <input type="number" id="probN" min="2" value="6">
+
+      <label for="probEvent">Selecciona el evento:</label>
+      <select id="probEvent">
+        <option value="sumPar">La suma es par</option>
+        <option value="sumImpar">La suma es impar</option>
+        <option value="alMenosUnaPar">Al menos una es par</option>
+      </select>
+
+      <button onclick="calcularProbabilidadUrna()">Calcular Probabilidad</button>
+      <div id="probGameResult" class="simulation-result"></div>
       <button class="back-home-btn" onclick="returnHome()">Volver al Inicio</button>
     </section>
   </div>
